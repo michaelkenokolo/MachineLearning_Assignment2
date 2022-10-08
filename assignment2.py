@@ -25,19 +25,28 @@ def main():
 
     x_data = data_frame[["T", "P", "TC", "SV"]].to_numpy()
     y_data = data_frame["Idx"].to_numpy()
+
     #standardize data and estimate covariance matrix
-    x_standardized_data = (x_data - np.mean(x_data)) / np.std(x_data)
+    x_standardized_data = preprocessing.StandardScaler().fit_transform(x_data)
+    #verify standardized data
+    for index in range(0,4,1):
+        print("{:.1f}".format(x_standardized_data[...,index].mean()))
+        print("{:.1f}".format(np.std(x_standardized_data[...,index])))
+    
+    cov_1 = np.dot(x_data.T, x_data)
     cov_matrix = np.cov(x_standardized_data.T)
+    print(cov_1)
+    print(cov_matrix)
     #calculate the eigvenvalues and eigenvector
-    eig_val, eig_vec = LA.eig(cov_matrix)
+    
+    # eig_val, eig_vec = LA.eig(cov_matrix)
+
     #find projection matrix
-    proj_matrix = np.dot(x_standardized_data, eig_vec)
-    print("eig vec")
-    print(eig_vec)
-    print("stand data")
-    print(x_standardized_data)
-    print("proj matrix")
-    print(proj_matrix)
+
+    #proj_matrix = np.dot(x_standardized_data.T, eig_vec)
+
+    #component matrix loading
+
 
 
 if __name__ == '__main__':
