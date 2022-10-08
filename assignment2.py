@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from pydoc import doc
 import sys
 import time
 import math
@@ -33,19 +34,45 @@ def main():
         print("{:.1f}".format(x_standardized_data[...,index].mean()))
         print("{:.1f}".format(np.std(x_standardized_data[...,index])))
     
-    cov_1 = np.dot(x_data.T, x_data)
-    cov_matrix = np.cov(x_standardized_data.T)
-    print(cov_1)
-    print(cov_matrix)
+    cov_matrix = np.cov(x_data.T)
     #calculate the eigvenvalues and eigenvector
-    
-    # eig_val, eig_vec = LA.eig(cov_matrix)
-
+    eig_val, eig_vec = LA.eig(cov_matrix)
     #find projection matrix
+    proj_matrix = np.dot(x_standardized_data, eig_vec)
+    #component matrix and explained variance
+    total_var = np.sum(eig_val)
+    for index in range(0,4,1):
+        percent_var = (eig_val[index] / total_var) * 100
+        print("%var of PC", (index+1), "is " + "{:.3f}".format(percent_var))
+        print(eig_vec[...,index])
 
-    #proj_matrix = np.dot(x_standardized_data.T, eig_vec)
+    # separate 80% of the data to training
+    testing_separation_index = math.floor(len(x_data) * 0.8)
+    x_training = x_data[:testing_separation_index]
+    x_testing = x_data[testing_separation_index:]
 
-    #component matrix loading
+    y_training = y_data[:testing_separation_index]
+    y_testing = y_data[testing_separation_index:]
+
+    pc1_training = []
+    selected_pc = 0
+    for data in x_training:
+        pc1_val = 0
+        for index in range(0,4,1):
+            pc1_val += (eig_vec[index,selected_pc] * data[index])
+        pc1_training.append([pc1_val])
+    # perform least squares regression
+    reg = linear_model.LinearRegression()
+    reg.fit(np.array(pc1_training), y_training)
+
+    # predict new value
+    print("predict with testing data")
+    print((pc1_training[500] * reg.coef_) + reg.intercept_)
+    print("real value")
+    print(y_training[500])
+
+
+
 
 
 
