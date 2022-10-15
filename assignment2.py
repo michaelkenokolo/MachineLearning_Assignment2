@@ -54,6 +54,7 @@ def main():
     y_training = y_data[:testing_separation_index]
     y_testing = y_data[testing_separation_index:]
 
+    #create pc scores for training data set
     pc1_training = []
     selected_pc = 0
     for data in x_training:
@@ -65,11 +66,60 @@ def main():
     reg = linear_model.LinearRegression()
     reg.fit(np.array(pc1_training), y_training)
 
+    #create pc scores for testing data set
+    pc1_testing = []
+    for data in x_testing:
+        pc1_val = 0
+        for index in range(0,4,1):
+            pc1_val += (eig_vec[index,selected_pc] * data[index])
+        pc1_testing.append([pc1_val])
+
+
     # predict new value
     print("predict with testing data")
     print((pc1_training[500] * reg.coef_) + reg.intercept_)
     print("real value")
     print(y_training[500])
+
+    #get the error for the prediction using PC1
+
+    #predict the y values with PC1 for the training and testing data 
+    y_pc1_predicted_training = reg.predict(pc1_training)
+    y_pc1_predicted_test = reg.predict(pc1_testing)
+    #create model for predicting using all variables
+    reg.fit(x_training, y_training)
+    #predict training and testing error using the original data in linear regression
+    y_predicted_test = reg.predict(x_testing)
+    y_predicted_training = reg.predict(x_training)
+
+    #get the error for training and testing data using PC1
+    #training
+    mean_error_training_pc1 =  mean_squared_error(y_training, y_pc1_predicted_training)
+    r2_training_pc1 = r2_score(y_training, y_pc1_predicted_training)
+    #testing
+    mean_error_testing_pc1 =  mean_squared_error(y_testing, y_pc1_predicted_test)
+    r2_testing_pc1 = r2_score(y_testing, y_pc1_predicted_test)
+
+    #get the error for training and testing data using original variables
+    #training
+    mean_error_training = mean_squared_error(y_training, y_predicted_training)
+    r2_training = r2_score(y_training, y_predicted_training)
+    #testing
+    mean_error_testing = mean_squared_error(y_testing, y_predicted_test)
+    r2_testing = r2_score(y_testing, y_predicted_test)
+
+    print("predictions for PC1")
+    print("The root mean squared error for the training data is", mean_error_training_pc1)
+    print("The r squared score for the training data is", r2_training_pc1)
+    print("The root mean squared error for the testing data is", mean_error_testing_pc1)
+    print("The r squared score for the testing data is", r2_testing_pc1)
+
+    print("predictions using original data")
+    print("The root mean squared error for the training data is", mean_error_training)
+    print("The r squared score for the training data is", r2_training)
+    print("The root mean squared error for the testing data is", mean_error_testing)
+    print("The r squared score for the testing data is", r2_testing)
+
 
 
 
